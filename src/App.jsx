@@ -219,17 +219,17 @@ export default function App() {
       .then(data => {
         if (data.status === 'success' && data.articles && data.articles.length > 0) {
           const mappedArticles = data.articles.map((a, idx) => ({
-             id: a.id,
-             category: a.category || 'Global Trends',
-             title: a.title,
-             hindiTitle: a.title,
-             marathiTitle: a.title,
-             summary: a.source || 'Breaking News',
-             hindiSummary: a.source || 'Breaking News',
-             marathiSummary: a.source || 'Breaking News',
-             image: a.image_url || a.thumbnail || 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&h=400&q=80',
-             url: a.url,
-             isImportant: idx < 2
+            id: a.id,
+            category: a.category || 'Global Trends',
+            title: a.title,
+            hindiTitle: a.title,
+            marathiTitle: a.title,
+            summary: a.source || 'Breaking News',
+            hindiSummary: a.source || 'Breaking News',
+            marathiSummary: a.source || 'Breaking News',
+            image: a.image_url || a.thumbnail || 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&h=400&q=80',
+            url: a.url,
+            isImportant: idx < 2
           }));
           setArticles(mappedArticles);
         }
@@ -408,23 +408,23 @@ function OnboardingScreen({ onComplete, lang }) {
       // Merge with existing data if any
       const existingUser = JSON.parse(localStorage.getItem('insightx_user') || '{}');
       const updatedUser = { ...existingUser, ...formData };
-      
+
       // POST to backend ONLY if dealing with a new capture or updates
       try {
         const response = await fetch('http://localhost:8001/api/users/onboard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedUser)
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedUser)
         });
-        
+
         if (!response.ok) {
-            console.error("Failed to sync user with backend");
-            // we proceed gracefully via localstorage anyway for UX flow
+          console.error("Failed to sync user with backend");
+          // we proceed gracefully via localstorage anyway for UX flow
         }
-      } catch(e) {
-          console.error("Backend unreachable", e);
+      } catch (e) {
+        console.error("Backend unreachable", e);
       }
-      
+
       onComplete(updatedUser);
     } else {
       alert('Please enter at least Name and Email');
@@ -534,9 +534,9 @@ function FeedScreen({ articles, profile, lang, onProfileClick, onArticleClick })
 
   useEffect(() => {
     // 🛠️ Using environment variable for security
-    const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY; 
-    const CITY = 'Pune'; 
-    
+    const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const CITY = 'Pune';
+
     if (API_KEY) {
       fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=metric&appid=${API_KEY}`)
         .then(res => res.json())
@@ -791,7 +791,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
   const baseArticle = articles.find(n => n.id === articleId) || articles[0];
   const [article, setArticle] = React.useState(baseArticle);
   const [isLoading, setIsLoading] = React.useState(true);
-  
+
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [showVideo, setShowVideo] = React.useState(false);
   const [selectedOpt, setSelectedOpt] = React.useState(null);
@@ -805,50 +805,57 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ article_id: articleId, profile: profile || 'student' })
     })
-    .then(res => res.json())
-    .then(data => {
-      console.log("RAW JSON REVEALED:", data);
+      .then(res => res.json())
+      .then(data => {
+        console.log("RAW JSON REVEALED:", data);
 
-      if (data && data.profile_used) {
-        // Map backend InsightOutput to frontend expected structure
-        const nextStepsMapped = data.next_steps ? data.next_steps.map(step => ({ en: step, hi: step })) : [];
-        const personalImpacts = data.profile_specific_insights ? Object.values(data.profile_specific_insights).filter(Boolean).flat().map(val => ({ en: val, hi: val })) : [];
-        
-        const mapped = {
-          ...baseArticle,
-          summary: data.summary || baseArticle.summary,
-          hindiSummary: data.summary || baseArticle.hindiSummary,
-          confidence: { en: data.fact_check_confidence, hi: data.fact_check_confidence },
-          didYouKnow: { en: data.simplified_explainer || '', hi: data.simplified_explainer || '' },
-          impactChain: data.cause_effect ? Object.keys(data.cause_effect).map(k => ({ text: k, direction: 'up' })) : [{ text: data.sentiment_label, direction: data.sentiment_label === 'positive' ? 'up' : 'down' }],
-          personalImpact: {
-            [profile]: personalImpacts.length ? personalImpacts : [{ en: 'Analyzing impact...', hi: 'Analyzing impact...' }]
-          },
-          whatToDo: {
-            [profile]: nextStepsMapped.length ? nextStepsMapped : [{ en: 'No immediate action required.', hi: 'No immediate action required.' }]
-          },
-          quiz: data.quiz && data.quiz.length > 0 ? {
-            question: { en: data.quiz[0].question || '', hi: data.quiz[0].question || '' },
-            options: (data.quiz[0].options || []).map(opt => ({ en: opt, hi: opt })),
-            answerIndex: data.quiz[0].answer_index || 0
-          } : null
-        };
-        setArticle(mapped);
-      }
-      setIsLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setIsLoading(false);
-    });
+        if (data && data.profile_used) {
+          // Map backend InsightOutput to frontend expected structure
+          const nextStepsMapped = data.next_steps ? data.next_steps.map(step => ({ en: step, hi: step })) : [];
+          const personalImpacts = data.profile_specific_insights ? Object.values(data.profile_specific_insights).filter(Boolean).flat().map(val => ({ en: val, hi: val })) : [];
+          const generatedImpactChain = data.cause_effect && Object.keys(data.cause_effect).length > 0
+            ? Object.entries(data.cause_effect).reduce((acc, [cause, effect]) => {
+              if (!acc.find(n => n.text === cause)) acc.push({ text: cause, direction: 'neutral' });
+              if (!acc.find(n => n.text === effect)) acc.push({ text: effect, direction: 'up' });
+              return acc;
+            }, [])
+            : [{ text: data.sentiment_label, direction: data.sentiment_label === 'positive' ? 'up' : 'down' }];
+
+          const mapped = {
+            ...baseArticle,
+            summary: data.summary || baseArticle.summary,
+            hindiSummary: data.summary || baseArticle.hindiSummary,
+            confidence: { en: data.fact_check_confidence, hi: data.fact_check_confidence },
+            didYouKnow: { en: data.simplified_explainer || '', hi: data.simplified_explainer || '' },
+            impactChain: generatedImpactChain,
+            personalImpact: {
+              [profile]: personalImpacts.length ? personalImpacts : [{ en: 'Analyzing impact...', hi: 'Analyzing impact...' }]
+            },
+            whatToDo: {
+              [profile]: nextStepsMapped.length ? nextStepsMapped : [{ en: 'No immediate action required.', hi: 'No immediate action required.' }]
+            },
+            quiz: data.quiz && data.quiz.length > 0 ? {
+              question: { en: data.quiz[0].question || '', hi: data.quiz[0].question || '' },
+              options: (data.quiz[0].options || []).map(opt => ({ en: opt, hi: opt })),
+              answerIndex: data.quiz[0].answer_index || 0
+            } : null
+          };
+          setArticle(mapped);
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
   }, [articleId, profile]);
 
   if (isLoading) {
     return (
       <div className="fade-in bg-white insight-page-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column' }}>
-         <h2 style={{color: 'var(--primary-color)'}}>AI Agents are analyzing this article...</h2>
-         <p style={{color: 'var(--text-secondary)'}}>Extracting facts, checking sentiment, and personalizing insights for you.</p>
-         <button onClick={onBack} style={{marginTop: '20px', padding: '10px 20px', borderRadius: '50px', background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer'}}>Cancel</button>
+        <h2 style={{ color: 'var(--primary-color)' }}>AI Agents are analyzing this article...</h2>
+        <p style={{ color: 'var(--text-secondary)' }}>Extracting facts, checking sentiment, and personalizing insights for you.</p>
+        <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '50px', background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer' }}>Cancel</button>
       </div>
     );
   }
@@ -994,7 +1001,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
               </div>
 
               <div className="vertical-chain">
-                {article.impactChain.map((node, i) => (
+                {(article.impactChain || []).map((node, i) => (
                   <div key={i} className="chain-node-card">
                     <div className={`chain-icon-box ${node.direction}`}>
                       {renderDirectionIcon(node.direction)}
