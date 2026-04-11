@@ -791,14 +791,21 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
         // Map backend InsightOutput to frontend expected structure
         const nextStepsMapped = data.next_steps ? data.next_steps.map(step => ({ en: step, hi: step })) : [];
         const personalImpacts = data.profile_specific_insights ? Object.values(data.profile_specific_insights).filter(Boolean).flat().map(val => ({ en: val, hi: val })) : [];
-        
+        const generatedImpactChain = data.cause_effect && Object.keys(data.cause_effect).length > 0
+            ? Object.entries(data.cause_effect).reduce((acc, [cause, effect]) => {
+                if (!acc.find(n => n.text === cause)) acc.push({ text: cause, direction: 'neutral' });
+                if (!acc.find(n => n.text === effect)) acc.push({ text: effect, direction: 'up' });
+                return acc;
+              }, [])
+            : [{ text: data.sentiment_label, direction: data.sentiment_label === 'positive' ? 'up' : 'down' }];
+
         const mapped = {
           ...baseArticle,
           summary: data.summary || baseArticle.summary,
           hindiSummary: data.summary || baseArticle.hindiSummary,
           confidence: { en: data.fact_check_confidence, hi: data.fact_check_confidence },
           didYouKnow: { en: data.simplified_explainer || '', hi: data.simplified_explainer || '' },
-          impactChain: data.cause_effect ? Object.keys(data.cause_effect).map(k => ({ text: k, direction: 'up' })) : [{ text: data.sentiment_label, direction: data.sentiment_label === 'positive' ? 'up' : 'down' }],
+          impactChain: generatedImpactChain,
           personalImpact: {
             [profile]: personalImpacts.length ? personalImpacts : [{ en: 'Analyzing impact...', hi: 'Analyzing impact...' }]
           },
@@ -972,7 +979,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
               </div>
 
               <div className="vertical-chain">
-                {article.impactChain.map((node, i) => (
+                {(article.impactChain || []).map((node, i) => (
                   <div key={i} className="chain-node-card">
                     <div className={`chain-icon-box ${node.direction}`}>
                       {renderDirectionIcon(node.direction)}
@@ -1014,7 +1021,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
                  </h2>
                  <div className="profile-badge">{profile} profile</div>
                  <ul className="footer-list">
-                   {(article.personalImpact[profile] || article.personalImpact.general).map((impact, i) => (
+                   {(((article.personalImpact || {})[profile]) || ((article.personalImpact || {}).general) || []).map((impact, i) => (
                      <li key={i}>{getLocalizedText(impact)}</li>
                    ))}
                  </ul>
@@ -1026,7 +1033,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
                   {profile === 'youngExplorer' ? 'Things You Can Do!' : 'Action Suggestions'}
                 </h2>
                 <ul className="footer-list">
-                  {(article.whatToDo[profile] || article.whatToDo.general).map((action, i) => (
+                  {(((article.whatToDo || {})[profile]) || ((article.whatToDo || {}).general) || []).map((action, i) => (
                     <li key={i}>{getLocalizedText(action)}</li>
                   ))}
                 </ul>

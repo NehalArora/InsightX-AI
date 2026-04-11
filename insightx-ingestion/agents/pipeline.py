@@ -80,6 +80,15 @@ async def run_pipeline(title: str = None, content: str = None, article_id: str =
         # Clean potential markdown wrapping
         res_clean = res.replace("```json", "").replace("```", "").strip()
         parsed = json.loads(res_clean)
+        
+        print("\n=== PIPELINE TOOL CHECK ===")
+        print(f"Summary Extractor:   {'succeeded' if 'summary' in parsed else 'failed'}")
+        print(f"Event Facts:         {'succeeded' if 'event_facts' in parsed else 'failed'}")
+        print(f"Sentiment Analyzer:  {'succeeded' if 'sentiment_label' in parsed else 'failed'}")
+        print(f"Cause/Effect Logic:  {'succeeded' if 'cause_effect' in parsed else 'failed'}")
+        print(f"Future Predictions:  {'succeeded' if 'future_predictions' in parsed else 'failed'}")
+        print(f"Action/Profile Data: {list(parsed.get('action_data', {}).keys())}")
+        print("===========================\n")
     except json.JSONDecodeError as decode_err:
         logger.error(f"Failed to parse LLM Output into JSON: {decode_err} - Raw Output: {res}")
     except Exception as e:
@@ -112,7 +121,17 @@ async def run_pipeline(title: str = None, content: str = None, article_id: str =
     # Default fallbacks
     safe_summary = parsed.get("summary", "Summary unavailable.")
     safe_event_facts = parsed.get("event_facts", {"who": "?", "what": "Failed to parse", "where": "?", "when": "?", "why": "?"})
+    if not isinstance(safe_event_facts, dict): safe_event_facts = {"Error": str(safe_event_facts)}
     
+    ce = parsed.get("cause_effect", {"Event": safe_summary})
+    if not isinstance(ce, dict): ce = {"Event": str(ce)}
+        
+    ns = next_steps
+    if not isinstance(ns, list): ns = [str(ns)]
+        
+    fp = parsed.get("future_predictions", [])
+    if not isinstance(fp, list): fp = [fp] if fp else []
+
     output = InsightOutput(
         profile_used=profile,
         title=article_title,
@@ -121,13 +140,13 @@ async def run_pipeline(title: str = None, content: str = None, article_id: str =
         event_context=safe_event_facts,
         fact_check_confidence="high", 
         sentiment_label=parsed.get("sentiment_label", "neutral"),
-        cause_effect=parsed.get("cause_effect", {"Event": safe_summary}),
+        cause_effect=ce,
         simplified_explainer=parsed.get("simplified_explainer", "Content too complex to simplify."),
         deep_dive=parsed.get("deep_dive", "No deeper contextual insight generated."),
         translated_context="",
         profile_specific_insights=custom_insights,
-        next_steps=next_steps,
-        future_predictions=parsed.get("future_predictions", []),
+        next_steps=ns,
+        future_predictions=fp,
         quiz=quiz_list,
         audio_path=""
     )
