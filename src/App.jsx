@@ -812,7 +812,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
       if (data && data.profile_used) {
         // Map backend InsightOutput to frontend expected structure
         const nextStepsMapped = data.next_steps ? data.next_steps.map(step => ({ en: step, hi: step })) : [];
-        const personalImpacts = data.profile_specific_insights ? Object.values(data.profile_specific_insights).filter(Boolean).map(val => ({ en: JSON.stringify(val), hi: JSON.stringify(val) })) : [];
+        const personalImpacts = data.profile_specific_insights ? Object.values(data.profile_specific_insights).filter(Boolean).flat().map(val => ({ en: val, hi: val })) : [];
         
         const mapped = {
           ...baseArticle,
@@ -1013,7 +1013,7 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
                     {lang === 'en' ? 'Watch Next' : 'आगे क्या देखना है'}
                   </h3>
                   <div className="flex flex-col gap-3">
-                    {article.watchNext.map((watch, i) => (
+                    {(article.watchNext || []).map((watch, i) => (
                       <div key={i} className="chain-node-card" style={{ padding: '1rem', alignItems: 'center' }}>
                         <ChevronRight size={16} color="var(--accent-color)" />
                         <span className="font-medium text-sm">{getLocalizedText(watch)}</span>
