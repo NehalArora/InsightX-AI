@@ -218,9 +218,24 @@ export default function App() {
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success' && data.articles && data.articles.length > 0) {
+          const inferCategory = (title) => {
+             const t = title.toLowerCase();
+             if (t.match(/\b(ai|artificial intelligence|robot|openai|chatgpt|machine learning)\b/)) return 'AI & Future';
+             if (t.match(/\b(startup|funding|founder|venture|investment|ceo|billion|startup)\b/)) return 'Startups';
+             if (t.match(/\b(tech|technology|apple|google|microsoft|cyber|software|app|data)\b/)) return 'Tech Innovation';
+             if (t.match(/\b(space|nasa|isro|science|research|study|climate|health|medical|virus|disease|cancer)\b/)) return 'Science';
+             if (t.match(/\b(economy|market|stock|trade|gdp|finance|bank|rupee|dollar|inflation)\b/)) return 'Economy';
+             if (t.match(/\b(sports|cricket|football|tennis|olympics|kohli|dhoni|ipl|bcci|match|tournament)\b/)) return 'Sports';
+             if (t.match(/\b(movie|film|actor|entertainment|netflix|cinema|hollywood|bollywood|star|music)\b/)) return 'Entertainment';
+             if (t.match(/\b(job|career|work|salary|office|hiring|employment)\b/)) return 'Careers';
+             if (t.match(/\b(school|education|student|university|college|exam|degree)\b/)) return 'Education';
+             if (t.match(/\b(politics|election|vote|minister|government|supreme court|congress|bjp|modi|law)\b/)) return 'Politics';
+             return 'Global Trends';
+          };
+
           const mappedArticles = data.articles.map((a, idx) => ({
              id: a.id,
-             category: a.category || 'Global Trends',
+             category: a.category || inferCategory(a.title),
              title: a.title,
              hindiTitle: a.title,
              marathiTitle: a.title,
