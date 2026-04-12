@@ -212,9 +212,8 @@ export default function App() {
   const [lang, setLang] = useState('en'); 
   const [articles, setArticles] = useState(NEWS_DATA);
 
-  useEffect(() => {
-    // Fetch initial feed from DB
-    fetch('http://localhost:8001/api/feed')
+  const fetchFeed = (cat = 'All') => {
+    fetch(`http://localhost:8001/api/feed?category=${encodeURIComponent(cat)}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success' && data.articles && data.articles.length > 0) {
@@ -244,12 +243,25 @@ export default function App() {
              marathiSummary: a.source || 'Breaking News',
              image: a.img_url || a.thumbnail || 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&h=400&q=80',
              url: a.url,
+             content: a.content || '',
              isImportant: idx < 2
           }));
-          setArticles(mappedArticles);
+          if (cat === 'All') {
+            setArticles(mappedArticles);
+          } else {
+            setArticles(prev => {
+              const others = prev.filter(p => p.category !== cat && !p.id.toString().startsWith('gnews_'));
+              return [...mappedArticles, ...others];
+            });
+          }
         }
       })
       .catch(err => console.error("Error fetching feed:", err));
+  };
+
+  useEffect(() => {
+    // Fetch initial feed
+    fetchFeed('All');
 
     // Load stored user data
     const savedUser = localStorage.getItem('insightx_user');
@@ -322,6 +334,7 @@ export default function App() {
           lang={lang}
           onProfileClick={() => navigate('profile')}
           onArticleClick={handleArticleSelect} 
+          fetchFeed={fetchFeed}
         />
       )}
       {currentScreen === 'insight' && (
@@ -554,7 +567,7 @@ function OnboardingScreen({ onComplete, lang }) {
 }
 
 
-function FeedScreen({ articles, profile, lang, onProfileClick, onArticleClick }) {
+function FeedScreen({ articles, profile, lang, onProfileClick, onArticleClick, fetchFeed }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [subTab, setSubTab] = useState('top'); // 'top' or 'forYou'
   
@@ -669,6 +682,7 @@ function FeedScreen({ articles, profile, lang, onProfileClick, onArticleClick })
                   onClick={() => {
                     setActiveCategory(cat);
                     if (cat === 'All') setSubTab('top');
+                    if (fetchFeed) fetchFeed(cat);
                   }}
                 >
                   {cat}
@@ -811,7 +825,14 @@ function InsightScreen({ articleId, articles, profile, lang, setLang, onBack }) 
     fetch('http://localhost:8001/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ article_id: articleId, profile: profile || 'student', user_id: userData.id })
+      body: JSON.stringify({ 
+         article_id: articleId && !String(articleId).startsWith('gnews_') ? articleId : null, 
+         url: article?.url || null,
+         title: article?.title || null,
+         content: article?.content || null,
+         profile: profile || 'student', 
+         user_id: userData.id 
+      })
     })
     .then(res => res.json())
     .then(data => {
