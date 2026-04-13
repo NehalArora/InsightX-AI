@@ -8,209 +8,14 @@ import {
 } from 'lucide-react';
 import './App.css';
 
-const MARKET_DATA = [
-  { symbol: 'NIFTY 50', value: '22,450.30', change: '+1.2%', up: true },
-  { symbol: 'SENSEX', value: '74,100.15', change: '+1.1%', up: true },
-  { symbol: 'Gold', value: '₹65,000', change: '-0.3%', up: false },
-  { symbol: 'USD/INR', value: '83.25', change: '+0.1%', up: true },
-  { symbol: 'Brent Oil', value: '$85.40', change: '+2.4%', up: true },
-  { symbol: 'NASDAQ', value: '16,200', change: '+1.5%', up: true }
-];
 
-const NEWS_DATA = [
-  {
-    id: 'a0000000-0000-0000-0000-000000000001',
-    category: 'Global Trends',
-    title: 'Middle East Conflict Impacts Global Trade Routes',
-    hindiTitle: 'मध्य पूर्व संघर्ष का वैश्विक व्यापार पर प्रभाव',
-    marathiTitle: 'मध्य पूर्व संघर्षामुळे जागतिक व्यापारावर परिणाम',
-    summary: 'Rising tensions disrupt major shipping lanes, affecting logistics and global supply chains.',
-    hindiSummary: 'बढ़ते तनाव से प्रमुख शिपिंग मार्ग बाधित हो रहे हैं।',
-    marathiSummary: 'वाढत्या तणावामुळे प्रमुख शिपिंग मार्ग विस्कळीत.',
-    image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&h=400&q=80',
-    audioSrc: { en: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', hi: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-    videoSrc: 'https://assets.mixkit.co/videos/preview/mixkit-animation-of-futuristic-devices-and-a-robot-3142-large.mp4',
-    isImportant: true,
-    impactChain: [
-      { text: 'Conflict', hindiText: 'संघर्ष', marathiText: 'संघर्ष', direction: 'neutral' },
-      { text: 'Supply Chain', hindiText: 'आपूर्ति', marathiText: 'पुरवठा साखळी', direction: 'down' },
-      { text: 'Logistics Cost', hindiText: 'रसद लागत', marathiText: 'रसद खर्च', direction: 'up' },
-      { text: 'Commodity Prices', hindiText: 'कीमतें', marathiText: 'किंमती', direction: 'up' }
-    ],
-    personalImpact: {
-      student: [
-        { en: 'International travel costs may increase', hi: 'अंतरराष्ट्रीय यात्रा की लागत बढ़ सकती है' },
-        { en: 'Imported gadgets could get pricier', hi: 'आयातित गैजेट महंगे हो सकते हैं' }
-      ],
-      investor: [
-        { en: 'Shipping & logistics stocks may see volatility', hi: 'शिपिंग और रसद शेयरों में अस्थिरता' },
-        { en: 'Energy sector might experience temporary gains', hi: 'ऊर्जा क्षेत्र में अस्थायी लाभ' }
-      ],
-      general: [
-        { en: 'Possible delay in imported goods delivery', hi: 'आयातित माल की डिलीवरी में देरी संभव' },
-        { en: 'Household grocery prices might see marginal hike', hi: 'घरेलू किराने की कीमतों में मामूली बढ़ोतरी' }
-      ],
-      youngExplorer: [
-        { en: 'Ships have to take a longer route, like a detour!', hi: 'जहाजों को लंबा रास्ता तय करना पड़ता है!' }
-      ]
-    },
-    whatToDo: {
-      student: [{ en: 'Explore opportunities in supply chain tech', hi: 'सप्लाई चेन टेक में अवसर तलाशें' }],
-      investor: [{ en: 'Review exposure to import-heavy sectors', hi: 'आयात-निर्भर क्षेत्रों के निवेश की समीक्षा करें' }],
-      general: [{ en: 'Plan major device purchases accordingly', hi: 'प्रमुख उपकरणों की खरीदारी की योजना बनाएं' }],
-      youngExplorer: [{ en: 'Look at a world map to see ocean routes!', hi: 'समुद्र के रास्ते देखने के लिए दुनिया का नक्शा देखें!' }]
-    },
-    watchNext: [{ en: 'Suez Canal traffic reports', hi: 'स्वेज़ नहर यातायात रिपोर्ट' }],
-    confidence: { en: 'Medium', hi: 'मध्यम' },
-    disclaimer: { en: 'Based on historical maritime patterns.', hi: 'ऐतिहासिक समुद्री पैटर्न पर आधारित।' },
-    didYouKnow: { en: 'About 90% of everything we buy travels by ship!', hi: 'हम जो कुछ भी खरीदते हैं उसका 90% जहाज से आता है!' },
-    quiz: {
-      question: { en: 'Most global goods are transported via:', hi: 'विदेशी माल ज्यादातर किससे लाया जाता है?' },
-      options: [
-        { en: 'Airplanes', hi: 'हवाई जहाज' },
-        { en: 'Ships', hi: 'जहाज़' },
-        { en: 'Trains', hi: 'ट्रेन' }
-      ],
-      answerIndex: 1
-    }
-  },
-  {
-    id: 'a0000000-0000-0000-0000-000000000002',
-    category: 'AI & Future',
-    title: 'Generative AI Accelerates Tech Automation',
-    hindiTitle: 'जेनरेटिव एआई ने टेक ऑटोमेशन को गति दी',
-    marathiTitle: 'जनरेटिव्ह एआय मुळे टेक ऑटोमेशनमध्ये गती',
-    summary: 'New AI models are fundamentally shifting how code and daily tasks are executed.',
-    hindiSummary: 'नए एआई मॉडल कोड और दैनिक कार्यों के निष्पादन के तरीके को बदल रहे हैं।',
-    marathiSummary: 'नवीन एआय मॉडेल्स काम करण्याच्या पद्धतीत बदल करत आहेत.',
-    image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&h=400&q=80',
-    audioSrc: '',
-    videoSrc: '',
-    isImportant: true,
-    impactChain: [
-      { text: 'AI Adoption', hindiText: 'AI अपनाना', marathiText: 'AI चा अवलंब', direction: 'up' },
-      { text: 'Routine Tasks', hindiText: 'नियमित कार्य', marathiText: 'नियमित कामे', direction: 'down' },
-      { text: 'Company Margins', hindiText: 'कंपनी मार्जिन', marathiText: 'कंपनी मार्जिन', direction: 'up' },
-      { text: 'New Job Roles', hindiText: 'नई नौकरियाँ', marathiText: 'नवीन नोकऱ्या', direction: 'up' }
-    ],
-    personalImpact: {
-      student: [
-        { en: 'AI literacy becomes a core hiring requirement', hi: 'एआई साक्षरता मुख्य भर्ती आवश्यकता' }
-      ],
-      investor: [
-        { en: 'Software service margins likely to improve', hi: 'सॉफ्टवेयर सेवा मार्जिन में सुधार की संभावना' },
-        { en: 'Cloud infrastructure demand surging', hi: 'क्लाउड इंफ्रास्ट्रक्चर की मांग में वृद्धि' }
-      ],
-      general: [
-        { en: 'Opportunities to utilize AI for daily productivity', hi: 'दैनिक उत्पादकता के लिए एआई का उपयोग' }
-      ],
-      youngExplorer: [
-        { en: 'Computers are learning to draw and write stories!', hi: 'कंप्यूटर चित्र बनाना और कहानियाँ लिखना सीख रहे हैं!' }
-      ]
-    },
-    whatToDo: {
-      student: [{ en: 'Focus on prompt engineering and logic', hi: 'प्रॉम्प्ट इंजीनियरिंग पर ध्यान दें' }],
-      investor: [{ en: 'Identify leaders in AI hardware', hi: 'एआई हार्डवेयर लीडर्स की पहचान करें' }],
-      general: [{ en: 'Try out fundamental AI writing tools', hi: 'बुनियादी एआई टूल्स का प्रयास करें' }],
-      youngExplorer: [{ en: 'Ask a teacher how AI can help you study!', hi: 'शिक्षक से पूछें कि एआई कैसे मदद kar sakta hai!' }]
-    },
-    watchNext: [{ en: 'Enterprise adoption metrics', hi: 'उद्यम निगम मेट्रिक्स' }],
-    confidence: { en: 'High', hi: 'उच्च' },
-    disclaimer: { en: 'Based on corporate investment patterns.', hi: 'कॉर्पोरेट निवेश पैटर्न पर आधारित।' },
-    didYouKnow: { en: 'The concept of AI was born over 60 years ago in 1956!', hi: 'एआई की अवधारणा 1956 में पैदा हुई थी!' },
-    quiz: {
-      question: { en: 'What is a popular use of modern Generative AI?', hi: 'आधुनिक जेनरेटिव एआई का एक लोकप्रिय उपयोग क्या है?' },
-      options: [
-        { en: 'Cooking food', hi: 'खाना बनाना' },
-        { en: 'Creating text and images', hi: 'टेक्स्ट और चित्र बनाना' },
-        { en: 'Driving trains', hi: 'ट्रेन चलाना' }
-      ],
-      answerIndex: 1
-    }
-  },
-  {
-    id: 'a0000000-0000-0000-0000-000000000003',
-    category: 'Science',
-    title: 'New Robotic Rover Detects Subsurface Mars Ice',
-    hindiTitle: 'रोवर ने मंगल पर बर्फ की खोज की',
-    marathiTitle: 'रोव्हरला मंगळावर बर्फ सापडला',
-    summary: 'A breakthrough discovery of pristine water ice could fuel future manned missions.',
-    hindiSummary: 'स्वच्छ पानी की बर्फ की खोज भविष्य के मानव मिशन को ऊर्जा दे सकती है।',
-    marathiSummary: 'पाण्याची बर्फाची शोध भविष्यातील मानवी मिशनला चालना देऊ शकते.',
-    image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?auto=format&fit=crop&w=600&h=400&q=80',
-    audioSrc: '',
-    videoSrc: '',
-    isImportant: false,
-    impactChain: [
-      { text: 'Mars Discovery', hindiText: 'मंगल ग्रह की खोज', marathiText: 'मंगळ शोध', direction: 'up' },
-      { text: 'Space Funding', hindiText: 'अंतरिक्ष अनुसंधान निधि', marathiText: 'अंतराळ निधी', direction: 'up' },
-      { text: 'Future Missions', hindiText: 'भविष्य के मिशन', marathiText: 'भविष्यातील मिशन्स', direction: 'up' }
-    ],
-    personalImpact: {
-      student: [{ en: 'Expected surge in astrophysics scholarships', hi: 'खगोल विज्ञान छात्रवृत्ति में वृद्धि' }],
-      investor: [{ en: 'Private space sector gains momentum', hi: 'निजी अंतरिक्ष क्षेत्र को गति' }],
-      general: [{ en: 'A step closer to multi-planetary existence', hi: 'बहु-ग्रहीय अस्तित्व के करीब' }],
-      youngExplorer: [{ en: 'Astronauts might use this ice for drinking water!', hi: 'अंतरिक्ष यात्री इस बर्फ का उपयोग पीने के लिए कर सकते हैं!' }]
-    },
-    whatToDo: {
-      student: [{ en: 'Join space science communities', hi: 'अंतरिक्ष विज्ञान समुदायों में शामिल हों' }],
-      investor: [{ en: 'Evaluate space-tech ETFs', hi: 'स्पेस-टेक ईटीएफ का मूल्यांकन करें' }],
-      general: [{ en: 'Watch latest space documentaries', hi: 'अंतरिक्ष वृत्तचित्र देखें' }],
-      youngExplorer: [{ en: 'Learn about the solar system tonight!', hi: 'आज रात सौर मंडल के बारे में जानें!' }]
-    },
-    watchNext: [{ en: 'Upcoming lunar launches', hi: 'आगामी चंद्र प्रक्षेपण' }],
-    confidence: { en: 'Very High', hi: 'बहुत उच्च' },
-    disclaimer: { en: 'Facts verified by official space agencies.', hi: 'आधिकारिक एजेंसियों द्वारा सत्यापित तथ्य।' },
-    didYouKnow: { en: 'Mars is red because its surface is covered in iron oxide (rust)!', hi: 'मंगल लाल है क्योंकि इसकी सतह जंग (लोहे के आक्साइड) से ढकी है!' },
-    quiz: {
-      question: { en: 'Which planet is known as the Red Planet?', hi: 'किस ग्रह को लाल ग्रह के नाम से जाना जाता है?' },
-      options: [
-        { en: 'Venus', hi: 'शुक्र' },
-        { en: 'Jupiter', hi: 'बृहस्पति' },
-        { en: 'Mars', hi: 'मंगल' }
-      ],
-      answerIndex: 2
-    }
-  },
-  {
-    id: 'a0000000-0000-0000-0000-000000000004',
-    category: 'Economy',
-    title: 'Central Bank Maintains Interest Rates for Q3',
-    hindiTitle: 'केंद्रीय बैंक ने ब्याज दरों को स्थिर रखा',
-    summary: 'The decision aims to balance inflation control with steady economic growth.',
-    image: 'https://images.unsplash.com/photo-1611974717483-5828ff797ae1?auto=format&fit=crop&w=600&h=400&q=80',
-    isImportant: true,
-    impactChain: [{ text: 'Market Stability', direction: 'up' }],
-    personalImpact: {
-       investor: [{ en: 'Borrowing costs remain predictable for businesses', hi: 'व्यवसायों के लिए ऋण लागत अनुमानित बनी हुई है' }],
-       student: [{ en: 'Education loan rates stable for current semester', hi: 'शिक्षा ऋण दरें स्थिर' }],
-       general: [{ en: 'Housing mortgage payments unlikely to spike soon', hi: 'बंधक भुगतान में वृद्धि की संभावना नहीं' }]
-    },
-    whatToDo: { investor: [{ en: 'Assess bond yields vs equity risks', hi: 'बॉन्ड यील्ड और इक्विटी रिस्क का आकलन करें' }] }
-  },
-  {
-    id: 'a0000000-0000-0000-0000-000000000005',
-    category: 'Education',
-    title: 'New Global Scholarship Program for AI Research',
-    hindiTitle: 'एआई रिसर्च के लिए नया वैश्विक छात्रवृत्ति कार्यक्रम',
-    summary: 'Top universities partner to fund 500 doctoral candidates in machine learning.',
-    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&h=400&q=80',
-    isImportant: false,
-    impactChain: [{ text: 'Academic Growth', direction: 'up' }],
-    personalImpact: {
-       student: [{ en: 'Huge opportunity for final year tech students', hi: 'अंतिम वर्ष के तकनीकी छात्रों के लिए बड़ा अवसर' }],
-       general: [{ en: 'More research leads to better consumer AI tools', hi: 'बेहतर उपभोक्ता एआई विकास' }]
-    },
-    whatToDo: { student: [{ en: 'Check eligibility criteria on official portal', hi: 'आधिकारिक पोर्टल पर पात्रता मानदंड देखें' }] }
-  }
-];
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('landing'); 
   const [profile, setProfile] = useState(null);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
   const [lang, setLang] = useState('en'); 
-  const [articles, setArticles] = useState(NEWS_DATA);
+  const [articles, setArticles] = useState([]);
 
   const fetchFeed = (cat = 'All') => {
     fetch(`http://localhost:8001/api/feed?category=${encodeURIComponent(cat)}`)
@@ -223,10 +28,10 @@ export default function App() {
              title: a.title,
              hindiTitle: a.title,
              marathiTitle: a.title,
-             summary: a.source || 'Breaking News',
-             hindiSummary: a.source || 'Breaking News',
-             marathiSummary: a.source || 'Breaking News',
-             image: a.img_url || a.thumbnail || 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&h=400&q=80',
+             summary: a.source || '',
+             hindiSummary: a.source || '',
+             marathiSummary: a.source || '',
+             image: a.image_url || a.img_url || a.thumbnail || '',
              url: a.url,
              content: a.content || '',
              isImportant: idx < 2

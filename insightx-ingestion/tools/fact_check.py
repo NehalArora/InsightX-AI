@@ -1,16 +1,73 @@
 import json
 from tools.llm import call_groq
 
-async def check_facts(claim: str, source_text: str) -> dict:
-    """Virtual replacement for facebook/bart-large-mnli via Groq"""
-    system = "You are an NLI (Natural Language Inference) zero-shot classification model."
-    prompt = (
-        "Compare the CLAIM against the SOURCE_TEXT. Determine if the claim is Entailment, Neutral, or Contradiction. "
-        "Output ONLY valid JSON containing 'verdict' (entailment, neutral, contradiction) and 'score' (0.0 to 1.0 confidence).\n\n"
-        f"CLAIM:\n{claim}\n\nSOURCE_TEXT:\n{source_text}"
-    )
+
+def clean(res: str):
+    return res.replace("```json", "").replace("```", "").strip()
+
+
+async def model_1(claim, source_text):
+    system = "You are an expert fact-checker."
+    
+    prompt = f"""
+Check authenticity of the claim.
+
+Return JSON:
+{{
+  "verdict": "credible | suspicious | false",
+  "confidence": float
+}}
+
+CLAIM: {claim}
+SOURCE: {source_text}
+"""
     res = await call_groq(prompt, system)
     try:
-        return json.loads(res.replace("```json", "").replace("```", "").strip())
+        return json.loads(clean(res))
     except:
-        return {"verdict": "neutral", "score": 0.5}
+        return {"verdict": "credible", "confidence": 0.9}
+
+
+async def model_2(claim, source_text):
+    system = "You are a strict misinformation detector."
+
+    prompt = f"""
+Analyze if the claim is misleading or false.
+
+Return JSON:
+{{
+  "verdict": "credible | suspicious | false",
+  "confidence": float
+}}
+
+CLAIM: {claim}
+SOURCE: {source_text}
+"""
+    res = await call_groq(prompt, system)
+    try:
+        return json.loads(clean(res))
+    except:
+        return {"verdict": "credible", "confidence": 0.9}
+
+
+async def check_news_authenticity(claim, source_text):
+    res1 = await model_1(claim, source_text)
+    res2 = await model_2(claim, source_text)
+
+    # Combine confidence
+    final_score = (res1["confidence"] + res2["confidence"]) / 2
+
+    # Final verdict
+    if final_score > 0.7:
+        verdict = "credible"
+    elif final_score < 0.4:
+        verdict = "false"
+    else:
+        verdict = "suspicious"
+
+    return {
+        "final_verdict": verdict,
+        "final_confidence": round(final_score, 2),
+        "model_1": res1,
+        "model_2": res2
+    }

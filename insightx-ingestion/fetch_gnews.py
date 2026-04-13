@@ -13,10 +13,17 @@ async def ingest_20_gnews():
     print("Initializing GNewsClient...")
     client = GNewsClient()
     
-    print("Fetching top headlines from GNews...")
-    # Fetch exactly what the API will provide (max 20 usually per page, we'll request general/technology)
-    raw_articles = await client.fetch_search(query="technology OR business OR science OR startup", max_results=30)
-    print(f"Fetched {len(raw_articles)} raw articles from GNews.")
+    print("Fetching top headlines from GNews with categories...")
+    tech = await client.fetch_top(category="technology", max_results=20)
+    science = await client.fetch_top(category="science", max_results=20)
+    business = await client.fetch_top(category="business", max_results=20)
+    
+    tech = [a for a in tech if a.image_url][:5]
+    science = [a for a in science if a.image_url][:5]
+    business = [a for a in business if a.image_url][:5]
+    
+    raw_articles = tech + science + business
+    print(f"Fetched {len(raw_articles)} raw articles containing images from GNews.")
     
     if not raw_articles:
         return
