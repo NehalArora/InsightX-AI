@@ -1,6 +1,6 @@
 from models.schemas import AgentContext
 from tools.llm import call_groq
-from tools.fact_check import check_facts
+from tools.fact_check import check_news_authenticity
 import json
 
 async def run(context: AgentContext) -> AgentContext:
@@ -23,6 +23,6 @@ async def run(context: AgentContext) -> AgentContext:
         
     # 2. Fact Check Layer (Shared)
     claim = context.event_facts.get("what", "Unknown event.")
-    context.fact_check = await check_facts(claim, context.article_text)
+    context.fact_check = await check_news_authenticity(claim, context.article_text)
     
     return context

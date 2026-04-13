@@ -1,11 +1,13 @@
 import json
 import logging
+import asyncio
 from typing import Dict, Any
 
 from models.schemas import InsightOutput
 from tools.news import fetch_article
 from db.supabase_client import get_article_by_id
 from tools.llm import call_groq
+from tools.fact_check import check_news_authenticity
 
 logger = logging.getLogger(__name__)
 
@@ -75,11 +77,16 @@ async def run_pipeline(title: str = None, content: str = None, article_id: str =
     user_prompt = f"PROFILE: {profile}\n\nTITLE: {article_title}\n\nCONTENT:\n{article_text[:6000]}"
     
     parsed = {}
+    fact_check_res = {}
     try:
-        res = await call_groq(user_prompt, system_prompt)
+        main_task = call_groq(user_prompt, system_prompt)
+        fact_task = check_news_authenticity(article_title, article_text[:3000])
+        res, fact_check_result = await asyncio.gather(main_task, fact_task)
+        
         # Clean potential markdown wrapping
         res_clean = res.replace("```json", "").replace("```", "").strip()
         parsed = json.loads(res_clean)
+        fact_check_res = fact_check_result
     except json.JSONDecodeError as decode_err:
         logger.error(f"Failed to parse LLM Output into JSON: {decode_err} - Raw Output: {res}")
     except Exception as e:
@@ -113,13 +120,19 @@ async def run_pipeline(title: str = None, content: str = None, article_id: str =
     safe_summary = parsed.get("summary", "Summary unavailable.")
     safe_event_facts = parsed.get("event_facts", {"who": "?", "what": "Failed to parse", "where": "?", "when": "?", "why": "?"})
     
+    confidence_str = "high"
+    if fact_check_res and "final_confidence" in fact_check_res:
+        conf_pct = int(fact_check_res["final_confidence"] * 100)
+        verdict = fact_check_res.get("final_verdict", "unknown").capitalize()
+        confidence_str = f"{conf_pct}% ({verdict})"
+    
     output = InsightOutput(
         profile_used=profile,
         title=article_title,
         original_url=article_url,
         summary=safe_summary,
         event_context=safe_event_facts,
-        fact_check_confidence="high", 
+        fact_check_confidence=confidence_str, 
         sentiment_label=parsed.get("sentiment_label", "neutral"),
         cause_effect=(parsed.get("cause_effect") if isinstance(parsed.get("cause_effect"), list) else [{"text": "Impact", "description": "Analyzing implications...", "direction": "neutral"}]),
         simplified_explainer=parsed.get("simplified_explainer", "Content too complex to simplify."),
